@@ -1,8 +1,9 @@
-[![Contributors][contributors-shield]][https://github.com/Erylis21/az-vm-windows/graphs/contributors]
-[![Forks][forks-shield]][https://github.com/Erylis21/az-vm-windows/network/members]
-[![Stargazers][stars-shield]][https://github.com/Erylis21/az-vm-windows/network/stargazers]
-[![Issues][issues-shield]][https://github.com/Erylis21/az-vm-windows/issues]
-[![LinkedIn][linkedin-shield]][https://www.linkedin.com/in/pierre-coquerel/]
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
 <br />
 <div align="center">

@@ -1,9 +1,10 @@
 <!-- BEGIN_TF_DOCS -->
-[![Contributors][contributors-shield]][https://github.com/Erylis21/az-vm-windows/graphs/contributors]
-[![Forks][forks-shield]][https://github.com/Erylis21/az-vm-windows/network/members]
-[![Stargazers][stars-shield]][https://github.com/Erylis21/az-vm-windows/network/stargazers]
-[![Issues][issues-shield]][https://github.com/Erylis21/az-vm-windows/issues]
-[![LinkedIn][linkedin-shield]][https://www.linkedin.com/in/pierre-coquerel/]
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
 <br />
 <div align="center">
@@ -129,4 +130,19 @@ module "example" {
 ## License
 
 MIT License - Copyright (c) 2023 The terraform-docs Authors.
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/Erylis21/repo_name.svg?style=for-the-badge
+[contributors-url]: https://github.com/Erylis21/az-vm-windows/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Erylis21/az-vm-windows.svg?style=for-the-badge
+[forks-url]: https://github.com/Erylis21/az-vm-windows/network/members
+[stars-shield]: https://img.shields.io/github/stars/Erylis21/az-vm-windows.svg?style=for-the-badge
+[stars-url]: https://github.com/Erylis21/az-vm-windows/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Erylis21/az-vm-windows.svg?style=for-the-badge
+[issues-url]: https://github.com/Erylis21/az-vm-windows/issues
+[license-shield]: https://img.shields.io/github/license/Erylis21/az-vm-windows.svg?style=for-the-badge
+[license-url]: https://github.com/Erylis21/az-vm-windows/blob/main/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/linkedin_username
 <!-- END_TF_DOCS -->
