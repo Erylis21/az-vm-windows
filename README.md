@@ -15,18 +15,12 @@
   </p>
 </div>
 
-## Providers
-
-| Name | Version |
-|------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.50.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | n/a |
-
 ## Requirements
 
 | Name | Version |
 |------|---------|
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.50.0 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.4.3 |
 
 ## Usage
 Basic usage of this module is as follows:
@@ -41,12 +35,12 @@ module "example" {
 	 key_vault_name  = 
 	 os_disk_size  = 
 	 private_ip  = 
-	 public_ip_sku  = 
 	 recovery_vault_name  = 
 	 recovery_vault_rg_name  = 
 	 resource_group_name  = 
 	 storage_account_name  = 
 	 subnet_name  = 
+	 tags  = 
 	 virtual_machine_autoupdate  = 
 	 virtual_machine_disk_caching  = 
 	 virtual_machine_disk_storage_account_type  = 
@@ -54,9 +48,22 @@ module "example" {
 	 virtual_machine_patch_mode  = 
 	 virtual_machine_size  = 
 	 virtual_network_name  = 
+	 virtual_network_rg_name  = 
 
 	 # Optional variables
+	 antimalware_extensionsExclusions  = ""
+	 antimalware_pathsExclusions  = ""
+	 antimalware_processesExclusions  = ""
+	 antimalware_scheduledScanDay  = 1
+	 antimalware_scheduledScanEnable  = true
+	 antimalware_scheduledScanTime  = 120
+	 antimalware_scheduledScanType  = "Quick"
+	 antimalware_signatureUpdatesFallbackOrder  = ""
+	 antimalware_signatureUpdatesFileSharesSources  = ""
+	 antimalware_signatureUpdatesInterval  = 0
+	 antimalware_signatureUpdatesScheduleDay  = 0
 	 ip_configuration_name  = ""
+	 public_ip_sku  = "Standard"
 	 virtual_machine_os_offer  = "WindowsServer"
 	 virtual_machine_os_publisher  = "MicrosoftWindowsServer"
 	 virtual_machine_os_sku  = "2022-datacenter-azure-edition"
@@ -91,6 +98,17 @@ module "example" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_antimalware_extensionsExclusions"></a> [antimalware\_extensionsExclusions](#input\_antimalware\_extensionsExclusions) | Extension to exclude of the IaaSAntimalware extension scan | `string` | `""` | no |
+| <a name="input_antimalware_pathsExclusions"></a> [antimalware\_pathsExclusions](#input\_antimalware\_pathsExclusions) | Path to exclude of the IaaSAntimalware extension scan | `string` | `""` | no |
+| <a name="input_antimalware_processesExclusions"></a> [antimalware\_processesExclusions](#input\_antimalware\_processesExclusions) | Processes to exclude of the IaaSAntimalware extension scan | `string` | `""` | no |
+| <a name="input_antimalware_scheduledScanDay"></a> [antimalware\_scheduledScanDay](#input\_antimalware\_scheduledScanDay) | Scheduled scan day of the IaaSAntimalware extension | `number` | `1` | no |
+| <a name="input_antimalware_scheduledScanEnable"></a> [antimalware\_scheduledScanEnable](#input\_antimalware\_scheduledScanEnable) | Enable a scheduled scan of the IaaSAntimalware extension | `bool` | `true` | no |
+| <a name="input_antimalware_scheduledScanTime"></a> [antimalware\_scheduledScanTime](#input\_antimalware\_scheduledScanTime) | Scheduled scan time of the IaaSAntimalware extension | `number` | `120` | no |
+| <a name="input_antimalware_scheduledScanType"></a> [antimalware\_scheduledScanType](#input\_antimalware\_scheduledScanType) | Scheduled scan type of the IaaSAntimalware extension | `string` | `"Quick"` | no |
+| <a name="input_antimalware_signatureUpdatesFallbackOrder"></a> [antimalware\_signatureUpdatesFallbackOrder](#input\_antimalware\_signatureUpdatesFallbackOrder) | Fallback order during signature update of the IaaSAntimalware extension | `string` | `""` | no |
+| <a name="input_antimalware_signatureUpdatesFileSharesSources"></a> [antimalware\_signatureUpdatesFileSharesSources](#input\_antimalware\_signatureUpdatesFileSharesSources) | Signature update file source of the IaaSAntimalware extension | `string` | `""` | no |
+| <a name="input_antimalware_signatureUpdatesInterval"></a> [antimalware\_signatureUpdatesInterval](#input\_antimalware\_signatureUpdatesInterval) | Signature update interval of the IaaSAntimalware extension | `number` | `0` | no |
+| <a name="input_antimalware_signatureUpdatesScheduleDay"></a> [antimalware\_signatureUpdatesScheduleDay](#input\_antimalware\_signatureUpdatesScheduleDay) | Signature update schedule day of the IaaSAntimalware extension | `number` | `0` | no |
 | <a name="input_backup_policy_name"></a> [backup\_policy\_name](#input\_backup\_policy\_name) | Name of the backup policy used for the virtual machine | `string` | n/a | yes |
 | <a name="input_create_public_ip"></a> [create\_public\_ip](#input\_create\_public\_ip) | Indicate if an ip public should be created for the virtual machine | `bool` | n/a | yes |
 | <a name="input_enable_ip_forwarding"></a> [enable\_ip\_forwarding](#input\_enable\_ip\_forwarding) | Indicate if ip forwarding is enable on the network interface | `bool` | n/a | yes |
@@ -98,12 +116,13 @@ module "example" {
 | <a name="input_key_vault_name"></a> [key\_vault\_name](#input\_key\_vault\_name) | Keyvault name used to stored the different virtual machine keys | `string` | n/a | yes |
 | <a name="input_os_disk_size"></a> [os\_disk\_size](#input\_os\_disk\_size) | Size of the OS disk in GB | `number` | n/a | yes |
 | <a name="input_private_ip"></a> [private\_ip](#input\_private\_ip) | Private IP attached to the virtual machine | `string` | n/a | yes |
-| <a name="input_public_ip_sku"></a> [public\_ip\_sku](#input\_public\_ip\_sku) | SKU used for the public ip | `string` | n/a | yes |
+| <a name="input_public_ip_sku"></a> [public\_ip\_sku](#input\_public\_ip\_sku) | SKU used for the public ip | `string` | `"Standard"` | no |
 | <a name="input_recovery_vault_name"></a> [recovery\_vault\_name](#input\_recovery\_vault\_name) | Name of the recovery service vault used to backup the virtual machine | `string` | n/a | yes |
 | <a name="input_recovery_vault_rg_name"></a> [recovery\_vault\_rg\_name](#input\_recovery\_vault\_rg\_name) | Resource group name of the recovery service vault used to backup the virtual machine | `string` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Resource group name where the virtual machine will be created | `string` | n/a | yes |
 | <a name="input_storage_account_name"></a> [storage\_account\_name](#input\_storage\_account\_name) | Storage account name used by the virtual machine to stored the boot diagnostic | `string` | n/a | yes |
 | <a name="input_subnet_name"></a> [subnet\_name](#input\_subnet\_name) | Subnet name where the virtual machine will be created | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tag to add on the created ressources | `map(string)` | n/a | yes |
 | <a name="input_virtual_machine_autoupdate"></a> [virtual\_machine\_autoupdate](#input\_virtual\_machine\_autoupdate) | Enable automatic update on the virtual machine | `bool` | n/a | yes |
 | <a name="input_virtual_machine_disk_caching"></a> [virtual\_machine\_disk\_caching](#input\_virtual\_machine\_disk\_caching) | The type of caching which should be used for the OS disk | `string` | n/a | yes |
 | <a name="input_virtual_machine_disk_storage_account_type"></a> [virtual\_machine\_disk\_storage\_account\_type](#input\_virtual\_machine\_disk\_storage\_account\_type) | The type of storage account which should back the OS Disk | `string` | n/a | yes |
@@ -116,6 +135,7 @@ module "example" {
 | <a name="input_virtual_machine_size"></a> [virtual\_machine\_size](#input\_virtual\_machine\_size) | Virtual machine size | `string` | n/a | yes |
 | <a name="input_virtual_machine_timezone"></a> [virtual\_machine\_timezone](#input\_virtual\_machine\_timezone) | Timezone of the virtual machine | `string` | `"Romance Standard Time"` | no |
 | <a name="input_virtual_network_name"></a> [virtual\_network\_name](#input\_virtual\_network\_name) | Virtual network name where the virtual machine will be created | `string` | n/a | yes |
+| <a name="input_virtual_network_rg_name"></a> [virtual\_network\_rg\_name](#input\_virtual\_network\_rg\_name) | Resource group name of the virtual network where the virtual machine will be created | `string` | n/a | yes |
 
 ## Outputs
 
@@ -127,13 +147,26 @@ module "example" {
 | <a name="output_virtual_machine_ip"></a> [virtual\_machine\_ip](#output\_virtual\_machine\_ip) | Private IP of the virtual machine |
 | <a name="output_virtual_machine_public_ip"></a> [virtual\_machine\_public\_ip](#output\_virtual\_machine\_public\_ip) | Private IP of the virtual machine |
 
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
 ## License
 
 MIT License - Copyright (c) 2023 The terraform-docs Authors.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/Erylis21/repo_name.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/Erylis21/az-vm-windows.svg?style=for-the-badge
 [contributors-url]: https://github.com/Erylis21/az-vm-windows/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/Erylis21/az-vm-windows.svg?style=for-the-badge
 [forks-url]: https://github.com/Erylis21/az-vm-windows/network/members

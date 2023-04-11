@@ -10,7 +10,7 @@ output "virtual_machine_ip" {
 
 output "virtual_machine_public_ip" {
   description = "Private IP of the virtual machine"
-  value       = azurerm_public_ip.public_ip.ip_address
+  value       = var.create_public_ip ? azurerm_public_ip.public_ip[0].ip_address : null
 }
 
 output "virtual_machine_admin_username" {

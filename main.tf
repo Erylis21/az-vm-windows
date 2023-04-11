@@ -13,7 +13,7 @@ data "azurerm_key_vault" "key_vault" {
 resource "random_string" "admin_username" {
   length  = 8
   upper   = false
-  number  = false
+  numeric = false
   lower   = true
   special = false
 
@@ -34,11 +34,11 @@ resource "random_password" "admin_password" {
   lower     = true
   min_lower = 4
 
-  numeric  = true
-  minumber = 4
+  numeric     = true
+  min_numeric = 4
 
-  upper         = true
-  min_min_upper = 4
+  upper     = true
+  min_upper = 4
 
   special          = true
   override_special = "!#$%&*-?"
@@ -68,18 +68,28 @@ resource "azurerm_key_vault_key" "osdisk_key" {
   key_vault_id = data.azurerm_key_vault.key_vault.id
 
   key_type = "RSA"
-  key_size = 2048
+  key_size = 4096
   key_opts = ["unwrapKey", "wrapKey"]
+
+  rotation_policy {
+    automatic {
+      time_before_expiry = "P180D"
+    }
+
+    expire_after         = "P210D"
+    notify_before_expiry = "P179D"
+  }
 
   tags = var.tags
 }
 
 # Create disk encryption set to encrypt the OS disk
 resource "azurerm_disk_encryption_set" "osdisk_des" {
-  name                = format("des-osdisk-%s", trimprefix(var.virtual_machine_name, "vm-"))
-  resource_group_name = data.azurerm_resource_group.rg.name
-  location            = data.azurerm_resource_group.rg.location
-  key_vault_key_id    = azurerm_key_vault_key.osdisk_key.id
+  name                      = format("des-osdisk-%s", trimprefix(var.virtual_machine_name, "vm-"))
+  resource_group_name       = data.azurerm_resource_group.rg.name
+  location                  = data.azurerm_resource_group.rg.location
+  key_vault_key_id          = azurerm_key_vault_key.osdisk_key.id
+  auto_key_rotation_enabled = true
 
   identity {
     type = "SystemAssigned"
@@ -106,7 +116,7 @@ resource "azurerm_key_vault_access_policy" "osdisk_des" {
 data "azurerm_subnet" "subnet" {
   name                 = var.subnet_name
   virtual_network_name = var.virtual_network_name
-  resource_group_name  = data.azurerm_resource_group.rg.name
+  resource_group_name  = var.virtual_network_rg_name
 }
 
 # Public Ip creation for the virtual machine
@@ -125,7 +135,7 @@ resource "azurerm_public_ip" "public_ip" {
 
 # Network interface Creation
 resource "azurerm_network_interface" "network_interface" {
-  name                = format("nic-%s", trimprefix(var.name, "vm-"))
+  name                = format("nic-%s", trimprefix(var.virtual_machine_name, "vm-"))
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 
@@ -136,7 +146,7 @@ resource "azurerm_network_interface" "network_interface" {
     subnet_id                     = data.azurerm_subnet.subnet.id
     private_ip_address_allocation = "Static"
     private_ip_address            = var.private_ip
-    public_ip_address_id          = var.create_public_ip ? azurerm_public_ip.public_ip[0].id : ""
+    public_ip_address_id          = var.create_public_ip ? azurerm_public_ip.public_ip[0].id : null
   }
 
   tags = var.tags
@@ -151,12 +161,13 @@ data "azurerm_storage_account" "storage" {
 # Virtual Machine Creation
 resource "azurerm_windows_virtual_machine" "vm" {
   name                = var.virtual_machine_name
+  computer_name       = trimprefix(var.virtual_machine_name, "vm-")
   resource_group_name = data.azurerm_resource_group.rg.name
   location            = data.azurerm_resource_group.rg.location
 
   size           = var.virtual_machine_size
   admin_username = local.admin_name
-  admin_password = random_password.password.result
+  admin_password = random_password.admin_password.result
 
   enable_automatic_updates = var.virtual_machine_autoupdate
   patch_mode               = var.virtual_machine_patch_mode
@@ -167,11 +178,11 @@ resource "azurerm_windows_virtual_machine" "vm" {
   ]
 
   os_disk {
-    name                   = format("osdik-%s", trimprefix(var.virtual_machine_name, "vm-"))
+    name                   = format("osdisk-%s", trimprefix(var.virtual_machine_name, "vm-"))
     caching                = var.virtual_machine_disk_caching != "" ? var.virtual_machine_disk_caching : ""
     storage_account_type   = var.virtual_machine_disk_storage_account_type != "" ? var.virtual_machine_disk_storage_account_type : "StandardSSD_ZRS"
     disk_size_gb           = var.os_disk_size
-    disk_encryption_set_id = azurerm_disk_encryption_set.disk_os_ecs.id
+    disk_encryption_set_id = azurerm_disk_encryption_set.osdisk_des.id
   }
 
   source_image_reference {
@@ -190,6 +201,10 @@ resource "azurerm_windows_virtual_machine" "vm" {
   }
 
   tags = var.tags
+
+  depends_on = [
+    azurerm_key_vault_access_policy.osdisk_des
+  ]
 }
 
 # Install the network watcher extension on the virtual machine
@@ -217,7 +232,19 @@ resource "azurerm_virtual_machine_extension" "extension_antimalware" {
   type_handler_version       = "1.7"
   auto_upgrade_minor_version = true
 
-  settings = file("${path.module}/resources/antimalware-config.json")
+  settings = templatefile("${path.module}/resources/antimalware-config.tpl", {
+    ScheduledScanEnable               = var.antimalware_scheduledScanEnable
+    ScheduledScanDay                  = var.antimalware_scheduledScanDay
+    ScheduledScanTime                 = var.antimalware_scheduledScanTime
+    ScheduledScanType                 = var.antimalware_scheduledScanType
+    ExtensionsExclusions              = var.antimalware_extensionsExclusions
+    PathsExclusions                   = var.antimalware_pathsExclusions
+    ProcessesExclusions               = var.antimalware_processesExclusions
+    SignatureUpdatesFileSharesSources = var.antimalware_signatureUpdatesFileSharesSources
+    SignatureUpdatesFallbackOrder     = var.antimalware_signatureUpdatesFallbackOrder
+    SignatureUpdatesScheduleDay       = var.antimalware_signatureUpdatesScheduleDay
+    SignatureUpdatesInterval          = var.antimalware_signatureUpdatesInterval
+  })
 
   tags = var.tags
 

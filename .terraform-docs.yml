@@ -16,8 +16,6 @@ sections:
 content: |-
   {{ .Header }}
 
-  {{ .Providers }}
-
   {{ .Requirements }}
 
   ## Usage
